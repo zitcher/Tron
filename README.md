@@ -16,7 +16,7 @@ CS 1410 Tron AI
 # How to make a PR
 1. Go to folder `cd [path]`
 
-2. Get up to date with master: `git rebase master`
+2. Get up to date with master: `git checkout master`, `git pull origin master`,  `git checkout [branch_name]`, `git rebase master`
 
 3. Fix all merge conflicts. There are many good tools out there!
 
