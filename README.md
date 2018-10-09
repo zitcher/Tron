@@ -14,8 +14,14 @@ CS 1410 Tron AI
 4. push the commit `git push origin [branch-name]`
 
 # How to make a PR
-1. Get up to date with master: `git rebase master`
+1. Go to folder `cd [path]`
 
-2. Fix all merge conflicts. There are many good tools out there!
+2. Get up to date with master: `git rebase master`
 
-3. Go to the repository page and make a PR
+3. Fix all merge conflicts. There are many good tools out there!
+
+4. Go to the repository page: https://github.com/zachooz/Tron
+
+5. Click create a pull request
+
+6. Choose the correct branches
