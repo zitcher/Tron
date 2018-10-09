@@ -1,5 +1,5 @@
 # Tron
-CS 1410 Tron AI
+CS 1410 Tron AI, python 3.6+
 
 ## Testing a game:
 `python gamerunner.py -bots [student/random/wall/ta1/ta2] [student/random/wall/ta1/ta2] -map [path to map]`
