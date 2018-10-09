@@ -1,6 +1,8 @@
 import time
 from tronproblem import TronProblem
-import copy, argparse, signal
+import copy
+import argparse
+import signal
 from collections import defaultdict
 import support
 import random
@@ -19,7 +21,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
     Runs a game and outputs the evaluation of the terminal state.
     """
     state = asp.get_start_state()
-    if not visualizer == None:
+    if visualizer is not None:
         visualizer(state, colored)
         time.sleep(delay)
 
@@ -30,7 +32,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
         try:
             # run AI
             decision = bots[state.ptm].decide(exposed)
-        except support.TimeoutException as msg:
+        except support.TimeoutException:
             if visualizer:
                 print(
                     """Warning. Player %s took too long to decide on a move.
@@ -41,14 +43,14 @@ They will go UP this round."""
         signal.setitimer(signal.ITIMER_REAL, 0)
 
         available_actions = asp.get_available_actions(state)
-        if not decision in available_actions:
+        if decision not in available_actions:
             decision = list(available_actions)[0]
 
         result_state = asp.transition(state, decision)
         asp.set_start_state(result_state)
 
         state = result_state
-        if not visualizer == None:
+        if visualizer is not None:
             visualizer(state, colored)
             time.sleep(delay)
 

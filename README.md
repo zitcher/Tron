@@ -1,13 +1,17 @@
 # Tron
 CS 1410 Tron AI
 
+## Testing a game:
+`python gamerunner.py -bots [student/random/wall/ta1/ta2] [student/random/wall/ta1/ta2] -map [path to map]`
+
+Example: `python gamerunner.py -bots student student -map maps/joust.txt`
 # How to change branches
 `git checkout -b [branch_name]`
 
 # Commits
 1. Go to folder `cd [path]`
 
-2. Add changes `git add .` 
+2. Add changes `git add .`
 
 3. Create a commit `git commit -m "[commit name]"`
 

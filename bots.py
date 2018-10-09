@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 import numpy as np
-from tronproblem import *
+from tronproblem import TronState, TronProblem
 from trontypes import CellType, PowerupType
-import random, math
+import random
+import math
 
 # Throughout this file, ASP means adversarial search problem.
 

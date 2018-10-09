@@ -79,7 +79,7 @@ class TronProblem(AdversarialSearchProblem):
         self._start_state = TronState(board, player_locs, first_player, player_powerups)
         self._num_players = len(player_locs)
 
-    ###### ADVERSARIAL SEARCH PROBLEM IMPLEMENTATION ######
+    # ADVERSARIAL SEARCH PROBLEM IMPLEMENTATION
 
     def get_available_actions(self, state):
         """
@@ -99,7 +99,7 @@ class TronProblem(AdversarialSearchProblem):
         board = [[elt for elt in row] for row in state.board]
         player_locs = [loc for loc in state.player_locs]
         next_ptm = (state.ptm + 1) % self._num_players
-        while player_locs[next_ptm] == None:
+        while player_locs[next_ptm] is None:
             next_ptm = (next_ptm + 1) % self._num_players
         # note that, given the assumption that state is non-terminal,
         # there will be at least 2 players still on the board when
@@ -178,7 +178,7 @@ class TronProblem(AdversarialSearchProblem):
     def is_terminal_state(self, state):
         num_players_left = 0
         for pl in state.player_locs:
-            if not (pl == None):
+            if not (pl is None):
                 num_players_left += 1
 
         return num_players_left == 1
@@ -190,10 +190,10 @@ class TronProblem(AdversarialSearchProblem):
         """
         assert self.is_terminal_state(state)
 
-        values = [0.0 if pl == None else 1 for pl in state.player_locs]
+        values = [0.0 if pl is None else 1 for pl in state.player_locs]
         return values
 
-    ###### STATIC METHODS FOR IMPLEMENTING METHODS ABOVE ######
+    # STATIC METHODS FOR IMPLEMENTING METHODS ABOVE
 
     @staticmethod
     def _add_barriers(board, loc):
@@ -318,7 +318,7 @@ class TronProblem(AdversarialSearchProblem):
         else:
             raise ValueError("The input direction is not valid.")
 
-    ###### HELPFUL FUNCTIONS FOR YOU ######
+    # HELPFUL FUNCTIONS FOR YOU
 
     @staticmethod
     def is_cell_player(board, loc):
