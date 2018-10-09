@@ -1,7 +1,7 @@
 # Tron
 CS 1410 Tron AI
 
-# How to branch
+# How to change branches
 `git checkout -b [branch_name]`
 
 # How to make a PR
