@@ -20,7 +20,7 @@ CS 1410 Tron AI
 
 3. Fix all merge conflicts. There are many good tools out there!
 
-4. Get up to date with master: `git push -f origin [branch-name]`
+4. Push the merge: `git push -f origin [branch-name]`
 
 5. Go to the repository page: https://github.com/zachooz/Tron
 
