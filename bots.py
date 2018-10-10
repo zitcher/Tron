@@ -5,12 +5,15 @@ from tronproblem import TronState, TronProblem
 from trontypes import CellType, PowerupType
 import random
 import math
+import boardparser
 
 # Throughout this file, ASP means adversarial search problem.
 
 
 class StudentBot:
     """ Write your student bot here"""
+    def __init__(self):
+        self.parser = boardparser.Parser()
 
     def decide(self, asp):
         """
@@ -20,6 +23,13 @@ class StudentBot:
         To get started, you can get the current
         state by calling asp.get_start_state()
         """
+        state = asp.get_start_state()
+        board = state.board
+        player = state.player_to_move()
+        player_armour = 1 if state.player_has_armor(player) else 0
+        player_speed = state.get_remaining_turns_speed(player)
+        opp_armour = 1 if state.player_has_armor(1 - player) else 0
+        self.parser.parse_board(board, player, player_armour, player_speed, opp_armour)
         return "U"
 
     def cleanup(self):
