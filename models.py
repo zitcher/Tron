@@ -6,11 +6,11 @@ class QSAModel:
     def __init__(self, input_size, output_size, batch_size):
         self.input_size = input_size
         self.output_size = output_size
-        self._batch_size = batch_size
+        self.batch_size = batch_size
 
         # define the placeholders
         self.inputs = tf.placeholder(shape=[None, self.input_size], dtype=tf.float32)
-        self._q_s_a = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
+        self.q_s_a = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
         self.logits = self.forward_pass()
         self.loss = self.loss_function()
         self.optimizer = self.optimizer()
@@ -51,7 +51,7 @@ class QSAModel:
                                                 input.reshape(1, self.input_size)})
 
     def predict_batch(self, inputs, sess):
-        return sess.run(self._logits, feed_dict={self.inputs: inputs})
+        return sess.run(self.logits, feed_dict={self.inputs: inputs})
 
     def train_batch(self, sess, x_batch, y_batch):
-        sess.run(self._optimizer, feed_dict={self.inputs: x_batch, self._q_s_a: y_batch})
+        sess.run(self.optimizer, feed_dict={self.inputs: x_batch, self.q_s_a: y_batch})
