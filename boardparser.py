@@ -42,7 +42,11 @@ class Parser(object):
         self.col_size = len(board[0])
         self.input_size = self.row_size * self.col_size * self.num_cell_types
 
+<<<<<<< edfd4a9aecbb277acc8fe6b4454d792f6eb4be36
     def parse_board(self, board, player, player_armour, player_speed, opp_armour):
+=======
+    def parse_board(self, board, player, p1_armour, p1_speed, p2_armour, p2_speed):
+>>>>>>> Parser
         types = None
         if player == 0:
             types = self.p1_types
@@ -52,16 +56,30 @@ class Parser(object):
         if self.input_size is None:
             self.init_input_size(board)
 
+<<<<<<< edfd4a9aecbb277acc8fe6b4454d792f6eb4be36
+=======
+        print(self.col_size)
+        print(self.num_cell_types)
+
+>>>>>>> Parser
         numpy_board = np.zeros(self.input_size)
         for i, row in enumerate(board):
             for j, element in enumerate(row):
                 index = i * self.col_size * self.num_cell_types + j * self.num_cell_types + types[element]
                 numpy_board[index] = 1
 
+<<<<<<< edfd4a9aecbb277acc8fe6b4454d792f6eb4be36
         metadata = np.zeros(3)
         metadata[0] = player_armour
         metadata[1] = player_speed
         metadata[2] = opp_armour
+=======
+        metadata = np.zeros(4)
+        metadata[0] = p1_armour
+        metadata[1] = p1_speed
+        metadata[2] = p2_armour
+        metadata[3] = p2_speed
+>>>>>>> Parser
 
         numpy_board = np.append(numpy_board, metadata)
         return numpy_board
