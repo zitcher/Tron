@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
+
 class QSAModel:
-    def __init__(self, num_states, num_actions, batch_size):
+    def __init__(self, input_size, output_size, batch_size):
         self.input_size = input_size
         self.output_size = output_size
         self._batch_size = batch_size
