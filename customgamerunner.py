@@ -1,13 +1,11 @@
 import time
-from tronproblem import TronProblem
-import copy
-import signal
+from customgame import CustomGame
 import support
 import random
 import numpy as np
 
 
-def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
+def run_game(bots, visualizer=False, delay=0.2, max_wait=0.3, colored=True):
     """
     Inputs:
         - asp: an adversarial search problem
@@ -18,42 +16,26 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
 
     Runs a game and outputs the evaluation of the terminal state.
     """
-    state = asp.get_start_state()
-    if visualizer is not None:
-        visualizer(state, colored)
+    game = CustomGame()
+    if visualizer:
+        game.visualize()
         time.sleep(delay)
 
-    while not (asp.is_terminal_state(state)):
-        exposed = copy.deepcopy(asp)
-        signal.signal(signal.SIGALRM, support.timeout_handler)
-        signal.setitimer(signal.ITIMER_REAL, max_wait)
-        try:
-            # run AI
-            decision = bots[state.ptm].decide(exposed)
-        except support.TimeoutException:
-            if visualizer:
-                print(
-                    """Warning. Player %s took too long to decide on a move.
-They will go UP this round."""
-                    % (state.ptm + 1)
-                )
-            decision = "U"
-        signal.setitimer(signal.ITIMER_REAL, 0)
+    while not (game.game_over()):
+        exposed = game.get_game_problem()
+        decision = bots[game.player_to_move()].decide(exposed)
 
-        available_actions = asp.get_available_actions(state)
+        available_actions = game.available_actions
         if decision not in available_actions:
-            decision = list(available_actions)[0]
+            raise("DECISION", decision, "NOT IN available_actions", available_actions)
 
-        result_state = asp.transition(state, decision)
-        asp.set_start_state(result_state)
+        game.take_action(decision, game.player_to_move())
 
-        state = result_state
-        if visualizer is not None:
-            visualizer(state, colored)
+        if visualizer:
+            game.visualize()
             time.sleep(delay)
 
-    return asp.evaluate_state(asp.get_start_state())
-
+    return game.get_results()
 
 # Note to self: clean this up for students.
 
@@ -63,14 +45,10 @@ def main():
     np.random.seed(None)
     bots = support.determine_bot_functions(["student", "student"])
 
-    maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt"]
-    game = TronProblem(random.choice(maps), 0)
-
-    visualizer = TronProblem.visualize_state
-
-    outcome = run_game(copy.deepcopy(game), bots, visualizer, 0.1, 0.3, True)
+    outcome = run_game(bots, True,  0.5, 0.3, True)
     winner = outcome.index(1) + 1
     print("Player %s won!" % winner)
+    time.sleep(.5)
     main()
 
 

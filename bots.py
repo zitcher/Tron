@@ -19,6 +19,7 @@ class StudentBot:
         """
         Input: asp, a TronProblem
         Output: A direction in {'U','D','L','R'}
+
         To get started, you can get the current
         state by calling asp.get_start_state()
         """

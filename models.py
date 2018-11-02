@@ -1,57 +1,37 @@
-import numpy as np
 import tensorflow as tf
 
 
-class QSAModel:
-    def __init__(self, input_size, output_size, batch_size):
+class DeepQModel:
+    def __init__(self, input_size=2608, output_size=4):
         self.input_size = input_size
         self.output_size = output_size
-        self.batch_size = batch_size
+        self.learning_rate = 1e-4
+        self.input = tf.placeholder(shape=[1, input_size], dtype=tf.float32)
 
-        # define the placeholders
-        self.inputs = tf.placeholder(shape=[None, self.input_size], dtype=tf.float32)
-        self.q_s_a = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
-        self.logits = self.forward_pass()
+        self.qVal = self.forward_pass()
+        self.nextQ = tf.placeholder(shape=[1, output_size], dtype=tf.float32)
         self.loss = self.loss_function()
-        self.optimizer = self.optimizer()
-        self._var_init = tf.global_variables_initializer()
+        self.optimizer = self.optimizer_function()
 
     def forward_pass(self):
         """
-        Predicts a label given an image using fully connected layers
+        Predicts a action given an game state using fully connected layers
 
         :return: the predicted label as a tensor
         """
+        w1 = tf.Variable(tf.zeros([self.input_size, self.input_size * 10]))
+        b1 = tf.Variable(tf.zeros([self.input_size * 10]))
+        o1 = tf.nn.relu(tf.add(tf.matmul(self.input, w1), b1))
 
-        # create a couple of fully connected hidden layers
-        fc1 = tf.layers.dense(self._states, int(self.input_size // 2), activation=tf.nn.relu)
-        fc2 = tf.layers.dense(fc1, int(self.input_size // 4), activation=tf.nn.relu)
-        fc3 = tf.layers.dense(fc2, int(self.input_size // 8), activation=tf.nn.relu)
-        logits = tf.layers.dense(fc3, self.output_size)
-        return logits
+        w2 = tf.Variable(tf.zeros([self.input_size * 10, self.output_size]))
+        b2 = tf.Variable(tf.zeros([self.output_size],))
+        o2 = tf.nn.sigmoid(tf.add(tf.matmul(o1, w2), b2))
+
+        return o2
 
     def loss_function(self):
-        """
-        Calculates the model loss
+        return tf.reduce_sum(tf.square(self.nextQ - self.qVal))
 
-        :return: the loss of the model as a tensor
-        """
-        return tf.losses.mean_squared_error(self._q_s_a, self._logits)
-
-    def optimizer(self):
-        """
-        Optimizes the model loss
-
-        :return: the optimizer as a tensor
-        """
+    def optimizer_function(self):
+        # return tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
         return tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
-
-    def predict_one(self, input, sess):
-        return sess.run(self.logits, feed_dict={self.inputs:
-                                                input.reshape(1, self.input_size)})
-
-    def predict_batch(self, inputs, sess):
-        return sess.run(self.logits, feed_dict={self.inputs: inputs})
-
-    def train_batch(self, sess, x_batch, y_batch):
-        sess.run(self.optimizer, feed_dict={self.inputs: x_batch, self.q_s_a: y_batch})

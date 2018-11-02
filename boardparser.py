@@ -2,6 +2,7 @@ import numpy as np
 
 
 # np.set_printoptions(threshold=np.nan)
+# size of 2604
 class Parser(object):
     def __init__(self):
         self.p1_types = dict()
@@ -42,7 +43,7 @@ class Parser(object):
         self.col_size = len(board[0])
         self.input_size = self.row_size * self.col_size * self.num_cell_types
 
-    def parse_board(self, board, player, player_armour, player_speed, opp_armour):
+    def parse_board(self, board, player, player_armour, player_speed, opp_armour, avail):
         types = None
         if player == 0:
             types = self.p1_types
@@ -62,6 +63,8 @@ class Parser(object):
         metadata[0] = player_armour
         metadata[1] = player_speed
         metadata[2] = opp_armour
+        avail = np.array(avail)
 
         numpy_board = np.append(numpy_board, metadata)
-        return numpy_board
+        numpy_board = np.append(numpy_board, avail)
+        return np.array([numpy_board])

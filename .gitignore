@@ -26,4 +26,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-*.pyc 
+model_data/
+
+*.pyc
