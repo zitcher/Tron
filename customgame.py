@@ -71,7 +71,7 @@ class CustomGame:
     def score_state(self, player):
         if self.state_over():
             if self.game.evaluate_state(self.state)[player] == 1:
-                return 5
+                return 1
             else:
                 return 0
         return 0.1
@@ -83,9 +83,7 @@ class CustomGame:
         player_armour = 1 if self.state.player_has_armor(player) else 0
         player_speed = self.state.get_remaining_turns_speed(player)
         opp_armour = 1 if self.state.player_has_armor(1 - player) else 0
-        avail = self.game.get_safe_actions(self.state.board, self.state.player_locs[player])
-        avail = [1 if a in avail else 0 for a in self.available_actions]
-        return self.parser.parse_board(self.state.board, player, player_armour, player_speed, opp_armour, avail)
+        return self.parser.parse_board(self.state.board, player, player_armour, player_speed, opp_armour)
 
     def visualize(self, colored=True):
         self.visualizer(self.state, colored)
