@@ -6,7 +6,7 @@ import copy
 
 class CustomGame:
     def __init__(self):
-        self.maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt"]
+        self.maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt", "./maps/maze.txt"]
         self.reset()
 
     def get_game_problem(self):
@@ -71,10 +71,10 @@ class CustomGame:
     def score_state(self, player):
         if self.state_over():
             if self.game.evaluate_state(self.state)[player] == 1:
-                return 1
+                return 1000
             else:
                 return 0
-        return 0.1
+        return 1
 
     def get_results(self):
         return self.game.evaluate_state(self.game.get_start_state())

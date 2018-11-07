@@ -5,7 +5,8 @@ class DeepQModel:
     def __init__(self, input_size=2604, output_size=4):
         self.input_size = input_size  # D L R U
         self.output_size = output_size
-        self.learning_rate = 1e-13
+        self.learning_rate = 1e-14
+        self.expansion = 10
         self.input = tf.placeholder(shape=[1, input_size], dtype=tf.float32)
 
         self.qVal = self.forward_pass()
@@ -19,22 +20,19 @@ class DeepQModel:
 
         :return: the predicted label as a tensor
         """
-        w1 = tf.Variable(tf.truncated_normal([self.input_size, self.input_size * self.output_size], stddev=0.01, dtype=tf.float32))
-        b1 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size], stddev=0.01, dtype=tf.float32))
+        w1 = tf.Variable(tf.truncated_normal([self.input_size, self.input_size * self.output_size * self.expansion], stddev=0.01, dtype=tf.float32))
+        b1 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size * self.expansion], stddev=0.01, dtype=tf.float32))
         o1 = tf.nn.relu(tf.add(tf.matmul(self.input, w1), b1))
 
-        w2 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size, self.input_size], stddev=0.01, dtype=tf.float32))
-        b2 = tf.Variable(tf.truncated_normal([self.input_size], dtype=tf.float32))
-        o2 = tf.nn.elu(tf.add(tf.matmul(o1, w2), b2))
+        w2 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size * self.expansion, self.output_size], stddev=0.01, dtype=tf.float32))
+        b2 = tf.Variable(tf.truncated_normal([self.output_size], stddev=0.01, dtype=tf.float32))
+        o2 = tf.nn.relu(tf.add(tf.matmul(o1, w2), b2))
 
-        w3 = tf.Variable(tf.truncated_normal([self.input_size, self.output_size], stddev=0.01, dtype=tf.float32))
-        b3 = tf.Variable(tf.truncated_normal([self.output_size], stddev=0.01, dtype=tf.float32))
-        o3 = tf.nn.relu(tf.add(tf.matmul(o2, w3), b3))
-
-        return o3
+        return o2
 
     def loss_function(self):
-        return tf.reduce_sum(tf.square(self.nextQ - self.qVal))
+        return tf.losses.mean_squared_error(self.nextQ, self.qVal)
+        # return tf.reduce_sum(tf.square(self.nextQ - self.qVal))
 
     def optimizer_function(self):
         # return tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)

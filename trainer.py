@@ -4,9 +4,9 @@ from models import DeepQModel
 import time
 from customgame import CustomGame
 import numpy as np
-import random
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 def train():
     """
@@ -15,35 +15,37 @@ def train():
     with tf.Session() as sess:
         gamma = 0.9
         # p1, p2 = DeepQModel(), DeepQModel()
-        p1, p2 = None, None
-        with tf.variable_scope("p1"):
-            p1 = DeepQModel()
-        with tf.variable_scope("p2"):
-            p2 = DeepQModel()
+        p1 = DeepQModel()
+        # with tf.variable_scope("p1"):
+        #     p1 = DeepQModel()
+        # with tf.variable_scope("p2"):
+        #     p2 = DeepQModel()
 
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver()
-        players = [p1, p2]
+        # players = [p1, p2]
         game = CustomGame()
 
         delay = 0.2
 
-        e_num = 1
-        e_dem = 1
+        exploration = 1
+        num_e_steps = 100
+        sub = exploration / num_e_steps
 
         for i in range(1, 100000):
+            reset_distribution = i % num_e_steps == 0
+            exploration -= sub
             visualize = i % 10 == 0
             # visualize = True
-            exploration = e_num/e_dem
-            e_dem += 1
 
             game.reset()
             print("Game", i, "exploration", exploration)
 
             while not (game.game_over()):
                 ptm = game.player_to_move()
-                model = players[ptm]
+                # model = players[ptm]
+                model = p1
                 i_board_state = game.get_game_parsed_state(ptm)
                 nextQ = sess.run(model.qVal, feed_dict={model.input: i_board_state})
                 action = np.argmax(nextQ)
@@ -86,9 +88,10 @@ def train():
 
                 sess.run(model.optimizer, feed_dict={model.input: i_board_state, model.nextQ: nextQ})
 
+            if reset_distribution:
+                exploration = 1
             if visualize:
                 if game.game_over():
-                    e_dem = 1
                     winner = game.get_results().index(1) + 1
                     print("Player %s won!" % winner)
                     print("Win Reward", game.score_state(game.get_results().index(1)))
