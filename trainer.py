@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from models import DeepQModel
+from models import DeepQModel, DQPolicyGradientModel
 import time
 from customgame import CustomGame
 import numpy as np
@@ -8,7 +8,107 @@ import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def train():
+def trainDQPG():
+    """
+    Trains DeepQModels
+    """
+    with tf.Session() as sess:
+        gamma = 0.95
+
+        model = DQPolicyGradientModel()
+
+        sess.run(tf.global_variables_initializer())
+
+        saver = tf.train.Saver()
+        # players = [p1, p2]
+        game = CustomGame()
+
+        delay = 0.2
+
+        exploration = 1
+        sub = 0.01
+
+        for i in range(1, 20000):
+            visualize = i % 10 == 0
+            # visualize = True
+            if exploration < 0:
+                exploration = 1
+            else:
+                exploration -= sub
+
+            game.reset()
+            print("Game", i, "exploration", exploration)
+            hist = [{"states": [], "actions": [], "rewards": []}, {"states": [], "actions": [], "rewards": []}]
+            while not (game.game_over()):
+                ptm = game.player_to_move()
+
+                i_board_state = game.get_game_parsed_state(ptm)
+                actionDistribution = sess.run(model.output, feed_dict={model.input: i_board_state})
+                action = np.random.choice(4, 1, p=actionDistribution[0])[0]
+                if np.random.rand(1) < exploration:
+                    if visualize:
+                        print("random_move")
+                    action = game.get_random_safe_move(ptm)
+                game.take_num_action(action, ptm)
+                rwd = game.score_state(ptm)
+                hist[ptm]["states"].append(i_board_state)
+                hist[ptm]["actions"].append(action)
+                hist[ptm]["rewards"].append(rwd)
+
+                if visualize:
+                    print("E", exploration, "PTM", ptm, "action", action, game.num_to_action[action], "aDist", actionDistribution, "rwd", rwd)
+                    game.visualize()
+                    time.sleep(delay)
+
+                if game.game_over():
+                    # game is over so change op final value
+                    op = ptm == 0
+                    if(len(hist[op]["rewards"]) > 0):
+                        hist[op]["rewards"][-1] = game.score_state(op)
+
+                    # propagate gamma through time
+                    pmtOffsetRewards = offsetRewardsByTime(hist[ptm]["rewards"][:], gamma)
+                    opOffsetRewards = offsetRewardsByTime(hist[op]["rewards"][:], gamma)
+
+                    ptm_input = np.squeeze(hist[ptm]["states"], axis=1)
+                    op_input = np.squeeze(hist[op]["states"], axis=1)
+
+                    if ptm_input.ndim == 1:
+                        ptm_input = ptm_input.reshape(1, ptm_input.shape[0])
+
+                    if op_input.ndim == 1:
+                        op_input = op_input.reshape(1, op_input.shape[0])
+
+                    if ptm_input.shape[1] > 0:
+                        sess.run(model.optimizer,
+                                 feed_dict={
+                                    model.input: ptm_input,
+                                    model.actions: hist[ptm]["actions"],
+                                    model.rewards: pmtOffsetRewards})
+
+                    if op_input.shape[1] > 0:
+                        sess.run(model.optimizer,
+                                 feed_dict={
+                                    model.input: op_input,
+                                    model.actions: hist[op]["actions"],
+                                    model.rewards: opOffsetRewards})
+
+                    if visualize:
+                        print("Gameover: player", ptm, "rwd", game.score_state(ptm), "player", op, "rwd", game.score_state(op))
+
+        save_path = saver.save(sess, "./model_data/dqpgm.ckpt")
+        print("Model saved in path: %s" % save_path)
+
+
+def offsetRewardsByTime(rewards, gamma):
+    for i, e in reversed(list(enumerate(rewards))):
+        if i + 1 == len(rewards):
+            continue
+        rewards[i] = rewards[i] + gamma * rewards[i + 1]
+    return rewards
+
+
+def trainDQ():
     """
     Trains DeepQModels
     """
@@ -102,7 +202,7 @@ def train():
 
 
 def main():
-    train()
+    trainDQPG()
 
 
 if __name__ == "__main__":
