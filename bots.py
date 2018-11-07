@@ -5,7 +5,7 @@ from tronproblem import TronState, TronProblem
 from trontypes import CellType, PowerupType
 import random
 import math
-
+import board_parser_copy as bp
 # Throughout this file, ASP means adversarial search problem.
 
 
@@ -51,6 +51,7 @@ class RandBot:
         ptm = state.ptm
         loc = locs[ptm]
         possibilities = list(TronProblem.get_safe_actions(board, loc))
+        print(board)
         if possibilities:
             return random.choice(possibilities)
         return "U"

@@ -1,6 +1,6 @@
 import numpy as np
 
-def board_parser(board_state, speed_number, armor, curr_player):
+def board_parser(board_state, speed_number1, armor1, curr_player, speed_number2, armor2):
     state_count = 9
     length = (len(board_state) * state_count) + 4 + 1
     parsed_list = np.zeros((length,), dtype=int)
@@ -20,10 +20,11 @@ def board_parser(board_state, speed_number, armor, curr_player):
         parsed_list[i*state_count + dict[board_state[i]] ] = 1
         parsed_list[i*state_count + 8] = 9
 
-    if armor:
+    if armor1:
         parsed_list[state_count * len(board_state)] = 1
-    if speed_number > 0:
-        parsed_list[state_count * len(board_state) + speed_number] = 1
+    if speed_number1 > 0:
+        parsed_list[state_count * len(board_state) + speed_number1] = 1
+    
     return parsed_list
 
 def which_player(num, curr_player):
