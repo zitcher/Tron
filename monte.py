@@ -1,7 +1,7 @@
 import vornoi
 
 class node():
-    def __init__(self, move = None, parent = None, state = None):
+    def __init__(self, move=None, parent=None, state=None):
         self.move = move
         self.parent = parent
         self.children = []

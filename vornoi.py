@@ -1,121 +1,76 @@
 from collections import deque
-import sys
 
-class vornoi:
+
+class Cell:
+    def __init__(self, type, owner, turn):
+        self.type = type
+        self.owner = owner
+        self.turn = turn
+
+
+class Vornoi:
     def __init__(self):
-        self.player1_score = 0
-        self.player2_score = 0
-    def mark_squares_with_distance(self, board, player1, player2):
-        self.player1_score = 0
-        self.player2_score = 0
-        playerLocs = self.find_player_loc(board, player1, player2)
-        dist_board = []
-        for row in range(len(board)):
-            dist_board.append([])
-            for col in range(len(board[0])):
-                dist_board[row].append([])
-                dist_board[row][col].append(board[row][col])
-                dist_board[row][col].append(float('inf'))
-                dist_board[row][col].append('w')
-        dist_board[playerLocs[0][0]][playerLocs[0][1]][2] = 'O'
-        dist_board[playerLocs[1][0]][playerLocs[1][1]][2] = 'T'
-        dist_board[playerLocs[0][0]][playerLocs[0][1]][1] = 0
-        dist_board[playerLocs[1][0]][playerLocs[1][1]][1] = 0
-        queue1 = deque()
-        queue2 = deque()
-        queue1.append(playerLocs[0])
-        queue2.append(playerLocs[1])
-        while(len(queue1) != 0 or len(queue2) != 0):
-            if len(queue1) != 0:
-                self.check_and_push_adjacent(dist_board, queue1, player1)
-            if len(queue2) != 0:
-                self.check_and_push_adjacent(dist_board, queue2, player2)
-        self.printy_time(dist_board)
-        return(self.player1_score, self.player2_score)
+        self.bad_set = set(['x', '#'])
+        self.ties = set()
+        return
 
+    def board_to_cells(self, board):
+        cell_board = []
+        for r in board:
+            cell_board.append([])
+            for element in r:
+                cell_board[-1].append(Cell(element, None, float('inf')))
 
+        return cell_board
 
+    def calc(self, state, player):
+        self.ties = set()
+        scores = [0, 0]
 
-    def check_and_push_adjacent(self, dist_board, queue, player):
-        next_level = deque()
-        while(len(queue) != 0):
-            curr = queue.popleft()
-            curr_square = self.get_square(dist_board, curr)
-            list_adjacents = self.get_list_adjacent(curr)
-            for pos in list_adjacents:
-                square_to_check = self.get_square(dist_board, pos)
-                self.mark_with_dist_and_player(curr_square, square_to_check, player, pos, next_level)
-        for pos in next_level:
-            queue.append(pos)
+        board = self.board_to_cells(state.board)
+        playerLocs = state.player_locs
+        opp = 0 == player
+
+        ptm_location = playerLocs[player]
+        board[ptm_location[0]][ptm_location[1]].owner = player
+
+        opp_location = playerLocs[opp]
+        board[opp_location[0]][opp_location[1]].owner = opp
+
+        fringe = deque()
+        fringe.append(ptm_location)
+        fringe.append(opp_location)
+
+        while(len(fringe) != 0):
+            cell_location = fringe.popleft()
+            cell = board[cell_location[0]][cell_location[1]]
+            scores[cell.owner] += self.expand(fringe, board, cell_location)
+
+        return scores[player] - scores[opp]
+
+    def expand(self, fringe, board, cell_location):
+        total = 0
+        player = board[cell_location[0]][cell_location[1]].owner
+        for pos in self.get_list_adjacent(cell_location):
+            new_cell = board[pos[0]][pos[1]]
+            if pos in self.ties or not self.expandable(new_cell, player):
+                continue
+
+            total += 1
+            if new_cell.owner is None:
+                new_cell.owner = player
+                fringe.append(pos)
+            else:
+                self.ties.add(pos)
+
+        return total
+
+    def expandable(self, cell, player):
+        return cell.type not in self.bad_set and cell.owner != player
 
     def get_list_adjacent(self, pos):
         x = pos[0]
         y = pos[1]
         return ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))
 
-    def printy_time(self, board):
-        for i in range(len(board)):
-            row = []
-            for j in range(len(board[0])):
-                row.append(board[i][j][2])
-            print row
-
-
-    def get_square(self, board, pos):
-        return board[pos[0]][pos[1]]
-
-    def mark_with_dist_and_player(self, curr_square, square_to_check, player, pos, next_level):
-
-        if(square_to_check[0] != '#'):
-            if square_to_check[2] != curr_square[2] and square_to_check[2] != 'n':
-                if(square_to_check[2] == 'w'):
-                    self.augment_score(player)
-                    square_to_check[1] = curr_square[1] + 1
-                    square_to_check[2] = str(player)
-                    next_level.append(pos)
-                elif(square_to_check[1] == curr_square[1] + 1):
-                    if(curr_square[2] != 'n'):
-                        self.augment_score(player)
-                    square_to_check[2] = 'n'
-
-    def augment_score(self, player):
-        if(player == 1):
-            self.player1_score += 1
-        if(player == 2):
-            self.player2_score += 1
-    @staticmethod
-    def find_player_loc(, board, player1, player2):
-        player1_tuple = (None, None)
-        player2_tuple = (None, None)
-        for row in range(len(board)):
-            for square in range(len(board[row])):
-                if board[row][square] == str(player1) :
-                    player1_tuple = (row, square)
-                if board[row][square] == str(player2):
-                    player2_tuple = (row, square)
-                if player1_tuple[0] != None and player2_tuple[0] != None:
-                    return (player1_tuple, player2_tuple)
-
-def check_vernoi(board_with_move_list, player, player1, player2):
-    max = 0
-    my_vornoi = vornoi()
-    for board in board_list:
-        board_result = my_vornoi.mark_squares_with_distance(board[0], player1, player2)[player -1]
-        if(board_result > max):
-            max = board_result
-
-
-myboard = ( ('#', '#', '#', '#', '#', '#'),
-            ('#', ' ', '1', ' ', ' ', '#'),
-            ('#', '#', ' ', '#', ' ', '#'),
-            ('#', ' ', ' ', '#', ' ', '#'),
-            ('#', ' ', ' ', '#', ' ', '#'),
-            ('#', ' ', '2', '#', ' ', '#'),
-            ('#', ' ', '#', '#', ' ', '#'),
-            ('#', ' ', ' ', ' ', ' ', '#'),
-            ('#', ' ', ' ', ' ', ' ', '#'),
-            ('#', ' ', ' ', ' ', ' ', '#'),
-            ('#', '#', '#', '#', '#', '#')
-            )
-mine = vornoi()
-print(mine.mark_squares_with_distance(myboard, 1, 2))
+    # def mark_board(self, board):

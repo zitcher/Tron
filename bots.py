@@ -1,11 +1,10 @@
 #!/usr/bin/python
 
 import numpy as np
-from tronproblem import TronState, TronProblem
-from trontypes import CellType, PowerupType
 import random
-import math
+import time
 import boardparser
+from vornoi import Vornoi
 
 # Throughout this file, ASP means adversarial search problem.
 
@@ -23,14 +22,22 @@ class StudentBot:
         To get started, you can get the current
         state by calling asp.get_start_state()
         """
+        vornoi_solver = Vornoi()
+
         state = asp.get_start_state()
-        board = state.board
-        player = state.player_to_move()
-        player_armour = 1 if state.player_has_armor(player) else 0
-        player_speed = state.get_remaining_turns_speed(player)
-        opp_armour = 1 if state.player_has_armor(1 - player) else 0
-        self.parser.parse_board(board, player, player_armour, player_speed, opp_armour)
-        return "U"
+        player = state.ptm
+        safe_moves = list(asp.get_safe_actions(state.board, state.player_locs[player]))
+        new_states = [asp.transition(state, move) for move in safe_moves]
+
+        start = time.time()
+        scored = [vornoi_solver.calc(nstate, player) for nstate in new_states]
+        end = time.time()
+        print(end - start)
+
+        if len(scored) == 0:
+            return "U"
+
+        return safe_moves[np.argmax(scored)]
 
     def cleanup(self):
         """
