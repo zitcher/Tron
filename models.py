@@ -45,8 +45,7 @@ class DQPolicyGradientModel:
     def __init__(self, input_size=2604, output_size=4):
         self.input_size = input_size  # D L R U
         self.output_size = output_size
-        self.expansion = 5
-        self.learning_rate = 0.0000001
+        self.learning_rate = 0.001
         self.dropout = 0.95
         self.input = tf.placeholder(shape=[None, input_size], dtype=tf.float32)
 
@@ -91,8 +90,7 @@ class DQPolicyGradientModelV2:
     def __init__(self, input_size=2604, output_size=4):
         self.input_size = input_size  # D L R U
         self.output_size = output_size
-        self.expansion = 5
-        self.learning_rate = 0.0000001
+        self.learning_rate = 0.00001
         self.dropout = 0.95
         self.input = tf.placeholder(shape=[None, input_size], dtype=tf.float32)
 

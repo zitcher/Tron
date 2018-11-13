@@ -291,7 +291,7 @@ def trainDQPV2(game):
     Trains DeepQModels
     """
     with tf.Session() as sess:
-        gamma = 0.95
+        gamma = 0.99
 
         p1_model, p2_model = DQPolicyGradientModelV2(), DQPolicyGradientModelV2()
 
