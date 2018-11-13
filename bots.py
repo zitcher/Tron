@@ -5,11 +5,44 @@ import random
 import time
 import boardparser
 from vornoi import Vornoi
+from adversarialsearch import alpha_beta_cutoff
 
 # Throughout this file, ASP means adversarial search problem.
 
 
 class StudentBot:
+    """ Write your student bot here"""
+    def __init__(self):
+        self.parser = boardparser.Parser()
+
+    def decide(self, asp):
+        """
+        Input: asp, a TronProblem
+        Output: A direction in {'U','D','L','R'}
+
+        To get started, you can get the current
+        state by calling asp.get_start_state()
+        """
+        vornoi_solver = Vornoi()
+
+        return alpha_beta_cutoff(asp, 7, vornoi_solver.calc)
+
+    def cleanup(self):
+        """
+        Input: None
+        Output: None
+
+        This function will be called in between
+        games during grading. You can use it
+        to reset any variables your bot uses during the game
+        (for example, you could use this function to reset a
+        turns_elapsed counter to zero). If you don't need it,
+        feel free to leave it as "pass"
+        """
+        pass
+
+
+class VornoiBot:
     """ Write your student bot here"""
     def __init__(self):
         self.parser = boardparser.Parser()
