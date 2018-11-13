@@ -25,7 +25,7 @@ class StudentBot:
         """
         vornoi_solver = Vornoi()
 
-        return alpha_beta_cutoff(asp, 7, vornoi_solver.calc)
+        return alpha_beta_cutoff(asp, 6, vornoi_solver.calc)
 
     def cleanup(self):
         """
