@@ -1,14 +1,94 @@
 import os
 import tensorflow as tf
-from models import DeepQModel, DQPolicyGradientModel
+from models import DeepQModel, DQPolicyGradientModel, QTable
 import time
 from customgame import CustomGame
 import numpy as np
+import sys
 
+sys.maxsize > 2**32
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def trainDQPG():
+def trainQT(game):
+    """
+    Trains Tabular Model
+    """
+    learning_rate = 0.2  # learning rate
+    future_confidence = 0.95  # weight of future results
+    num_episodes = 1000000
+    exploration = 0.1
+    delay = 0.5
+    q_table = QTable()
+    # q_table.load_table("modeldata/qtable.json")
+
+    for i in range(num_episodes):
+        print("Game", i, i/num_episodes)
+        visualize = i % 100000 == 0
+        game.reset()
+
+        while not (game.game_over()):
+            ptm = game.player_to_move()
+            initial_state = game.get_game_string_parsed_state(ptm)
+            action = None
+
+            if visualize:
+                if q_table.knows_state(initial_state):
+                    print(q_table.table[initial_state])
+                else:
+                    print("New State", "table size:", len(q_table.table))
+
+            if np.random.rand(1) < exploration:
+                if visualize:
+                    print("random_move")
+                action = game.get_random_safe_move(ptm)
+            else:
+                action = q_table.get_optimal_action(initial_state)
+
+            game.take_num_action(action, ptm)
+            reward = game.score_state(ptm)
+
+            if game.game_over():
+                q_table.set_state_action_as_index(initial_state, action, reward)
+                if visualize:
+                    print("Learned State", q_table.table[initial_state], q_table.get_state_action_value(initial_state, action))
+            else:
+                opp = game.player_to_move()
+                opp_state = game.get_game_string_parsed_state(opp)
+                opp_action = q_table.get_optimal_action(opp_state)
+
+                if opp_action not in game.safe_moves(opp):
+                    opp_action = game.get_random_safe_move(opp)
+
+                game.see_num_action_result(opp_action, opp)
+                if game.state_over():
+                    reward = game.score_state(ptm)
+                    q_table.set_state_action_as_index(initial_state, action, reward)
+                    if visualize:
+                        print("Win action", game.num_to_action[action], "reward", reward)
+                else:
+                    next_state = game.get_game_string_parsed_state(ptm)
+                    next_action = q_table.get_optimal_action(next_state)
+                    delta = reward
+                    delta += future_confidence * q_table.get_state_action_value(next_state, next_action)
+                    delta -= q_table.get_state_action_value(initial_state, action)
+
+                    q_table.set_state_action_as_index(initial_state,
+                                                      action,
+                                                      q_table.get_state_action_value(initial_state, action) + learning_rate * delta)
+
+                    if visualize:
+                        print("Learning State", q_table.table[initial_state], q_table.get_state_action_value(initial_state, action))
+            if visualize:
+                game.visualize()
+                time.sleep(delay)
+
+            game.rewind()
+
+    q_table.save_table("modeldata/qtable.json")
+
+
+def trainDQPG(game):
     """
     Trains DeepQModels
     """
@@ -21,20 +101,20 @@ def trainDQPG():
 
         saver = tf.train.Saver()
         # players = [p1, p2]
-        game = CustomGame()
 
         delay = 0.2
 
-        exploration = 1
-        sub = 0.01
+        exploration = 0.1
+        # runs = 20000
+        # sub = 1/runs
 
-        for i in range(1, 20000):
+        for i in range(1, 40000):
             visualize = i % 10 == 0
             # visualize = True
-            if exploration < 0:
-                exploration = 1
-            else:
-                exploration -= sub
+            # if exploration < 0:
+            #     exploration = 1
+            # else:
+            #     exploration -= sub
 
             game.reset()
             print("Game", i, "exploration", exploration)
@@ -66,9 +146,13 @@ def trainDQPG():
                     if(len(hist[op]["rewards"]) > 0):
                         hist[op]["rewards"][-1] = game.score_state(op)
 
+                    if(len(hist[ptm]["rewards"]) > 0):
+                        hist[ptm]["rewards"][-1] = game.score_state(ptm)
+
                     # propagate gamma through time
                     pmtOffsetRewards = offsetRewardsByTime(hist[ptm]["rewards"][:], gamma)
                     opOffsetRewards = offsetRewardsByTime(hist[op]["rewards"][:], gamma)
+                    print("REWARDS OFFSET ptm, opp", pmtOffsetRewards, opOffsetRewards)
 
                     ptm_input = np.squeeze(hist[ptm]["states"], axis=1)
                     op_input = np.squeeze(hist[op]["states"], axis=1)
@@ -104,11 +188,13 @@ def offsetRewardsByTime(rewards, gamma):
     for i, e in reversed(list(enumerate(rewards))):
         if i + 1 == len(rewards):
             continue
+        if rewards[i + 1] == 0:
+            break
         rewards[i] = rewards[i] + gamma * rewards[i + 1]
     return rewards
 
 
-def trainDQ():
+def trainDQ(game):
     """
     Trains DeepQModels
     """
@@ -169,7 +255,6 @@ def trainDQ():
                     if game.state_over():
                         rwd = game.score_state(ptm)
                         board_state = game.get_game_parsed_state(ptm)
-                        nQVal = sess.run(model.qVal, feed_dict={model.input: board_state})
                         nextQ[0, action] = rwd
                         if visualize:
                             print("Win action", game.num_to_action[action], action, game.num_to_action[action], "reward", rwd)
@@ -202,7 +287,8 @@ def trainDQ():
 
 
 def main():
-    trainDQPG()
+    trainDQPG(CustomGame())
+    # trainQT(CustomGame())
 
 
 if __name__ == "__main__":

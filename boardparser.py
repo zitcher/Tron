@@ -66,3 +66,61 @@ class Parser(object):
 
         numpy_board = np.append(numpy_board, metadata)
         return np.array([numpy_board])
+
+
+class BoardStringParser(object):
+    def __init__(self):
+        self.p1_types = dict()
+        self.p2_types = dict()
+        self.init_types_p1()
+        self.init_types_p2()
+
+        assert(len(self.p1_types) == len(self.p2_types))
+        self.num_cell_types = len(self.p1_types)
+        self.input_size = None
+        self.row_size = None
+        self.col_size = None
+
+    def init_types_p1(self):
+        self.p1_types["#"] = "#"
+        self.p1_types["x"] = "x"
+        self.p1_types[" "] = " "
+        self.p1_types["*"] = "*"
+        self.p1_types["^"] = "^"
+        self.p1_types["!"] = "!"
+        self.p1_types["@"] = "@"
+        self.p1_types["1"] = "p"
+        self.p1_types["2"] = "o"
+
+    def init_types_p2(self):
+        self.p2_types["#"] = "#"
+        self.p2_types["x"] = "x"
+        self.p2_types[" "] = " "
+        self.p2_types["*"] = "*"
+        self.p2_types["^"] = "^"
+        self.p2_types["!"] = "!"
+        self.p2_types["@"] = "@"
+        self.p2_types["1"] = "o"
+        self.p2_types["2"] = "p"
+
+    def init_input_size(self, board):
+        self.row_size = len(board)
+        self.col_size = len(board[0])
+
+    def parse_board(self, board, player, player_armour, player_speed, opp_armour):
+        types = None
+        if player == 0:
+            types = self.p1_types
+        elif player == 1:
+            types = self.p2_types
+
+        string_rep = ""
+        for row in board:
+            for element in row:
+                string_rep += types[element]
+
+        string_rep += player_armour
+        string_rep += player_speed
+        string_rep += opp_armour
+
+        return string_rep

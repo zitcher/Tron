@@ -6,7 +6,7 @@ import copy
 
 class CustomGame:
     def __init__(self):
-        self.maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt", "./maps/maze.txt"]
+        self.maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt"] #, "./maps/maze.txt"
         self.reset()
 
     def get_game_problem(self):
@@ -20,8 +20,10 @@ class CustomGame:
         self.state = self.game.get_start_state()
         self.available_actions = sorted(list(self.game.get_available_actions(None)))
         self.num_to_action, self.action_to_num = self.build_num_to_action()
+        self.num_actions = len(self.available_actions)
         self.parser = boardparser.Parser()
         self.visualizer = TronProblem.visualize_state
+        self.board_string_parser = boardparser.BoardStringParser()
 
     def build_num_to_action(self):
         num_to_action = dict()
@@ -62,6 +64,11 @@ class CustomGame:
             return 0
         return self.action_to_num[random.sample(avail, 1)[0]]
 
+    def safe_moves(self, player):
+        avail = self.game.get_safe_actions(self.state.board, self.state.player_locs[player])
+        avail = [self.action_to_num[action] for action in avail]
+        return avail
+
     def game_over(self):
         return self.game.is_terminal_state(self.game.get_start_state())
 
@@ -71,10 +78,10 @@ class CustomGame:
     def score_state(self, player):
         if self.state_over():
             if self.game.evaluate_state(self.state)[player] == 1:
-                return 100
+                return 1
             else:
-                return -100
-        return 1
+                return 0
+        return 0.1
 
     def get_results(self):
         return self.game.evaluate_state(self.game.get_start_state())
@@ -84,6 +91,12 @@ class CustomGame:
         player_speed = self.state.get_remaining_turns_speed(player)
         opp_armour = 1 if self.state.player_has_armor(1 - player) else 0
         return self.parser.parse_board(self.state.board, player, player_armour, player_speed, opp_armour)
+
+    def get_game_string_parsed_state(self, player):
+        player_armour = '1' if self.state.player_has_armor(player) else '0'
+        player_speed = str(self.state.get_remaining_turns_speed(player))
+        opp_armour = '1' if self.state.player_has_armor(1 - player) else '0'
+        return self.board_string_parser.parse_board(self.state.board, player, player_armour, player_speed, opp_armour)
 
     def visualize(self, colored=True):
         self.visualizer(self.state, colored)
