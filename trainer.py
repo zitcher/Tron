@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from models import DeepQModel, DQPolicyGradientModel, QTable
+from models import DeepQModel, DQPolicyGradientModel, QTable, DQPolicyGradientModelV2
 import time
 from customgame import CustomGame
 import numpy as np
@@ -104,12 +104,12 @@ def trainDQPG(game):
 
         delay = 0.2
 
-        exploration = 0.1
+        exploration = 0.25
         # runs = 20000
         # sub = 1/runs
 
         for i in range(1, 40000):
-            visualize = i % 10 == 0
+            visualize = i % 100 == 0
             # visualize = True
             # if exploration < 0:
             #     exploration = 1
@@ -152,7 +152,7 @@ def trainDQPG(game):
                     # propagate gamma through time
                     pmtOffsetRewards = offsetRewardsByTime(hist[ptm]["rewards"][:], gamma)
                     opOffsetRewards = offsetRewardsByTime(hist[op]["rewards"][:], gamma)
-                    print("REWARDS OFFSET ptm, opp", pmtOffsetRewards, opOffsetRewards)
+                    # print("move ptm, opp", hist[ptm]["actions"], hist[op]["actions"])
 
                     ptm_input = np.squeeze(hist[ptm]["states"], axis=1)
                     op_input = np.squeeze(hist[op]["states"], axis=1)
@@ -286,8 +286,115 @@ def trainDQ(game):
         print("Model saved in path: %s" % save_path)
 
 
+def trainDQPV2(game):
+    """
+    Trains DeepQModels
+    """
+    with tf.Session() as sess:
+        gamma = 0.95
+
+        p1_model, p2_model = DQPolicyGradientModelV2(), DQPolicyGradientModelV2()
+
+        # with tf.variable_scope("p1"):
+        #     p1_model = DQPolicyGradientModelV2()
+        # with tf.variable_scope("p2"):
+        #     p2_model = DQPolicyGradientModelV2()
+
+        models = [p1_model, p2_model]
+
+        sess.run(tf.global_variables_initializer())
+
+        saver = tf.train.Saver()
+        # players = [p1, p2]
+
+        delay = 0.2
+
+        exploration = 0.1
+        # runs = 20000
+        # sub = 1/runs
+
+        for i in range(1, 40000):
+            visualize = i % 100 == 0
+            # visualize = True
+            # if exploration < 0:
+            #     exploration = 1
+            # else:
+            #     exploration -= sub
+
+            game.reset()
+            print("Game", i, "exploration", exploration)
+            hist = [{"states": [], "actions": [], "outputs": [], "rewards": []}, {"states": [], "actions": [], "outputs": [], "rewards": []}]
+            while not (game.game_over()):
+                ptm = game.player_to_move()
+                model = models[ptm]
+
+                i_board_state = game.get_game_parsed_state(ptm)
+                actionDistribution = sess.run(model.output, feed_dict={model.input: i_board_state})
+                hist[ptm]["outputs"].append(actionDistribution[0])
+                action = np.argmax(actionDistribution)
+                if np.random.rand(1) < exploration:
+                    if visualize:
+                        print("random_move")
+                    action = game.get_random_safe_move(ptm)
+                game.take_num_action(action, ptm)
+                rwd = game.score_state(ptm)
+                hist[ptm]["states"].append(i_board_state[0])
+                hist[ptm]["actions"].append(action)
+                hist[ptm]["rewards"].append(rwd)
+
+                if visualize:
+                    print("E", exploration, "PTM", ptm, "action", action, game.num_to_action[action], "aDist", actionDistribution, "rwd", rwd)
+                    game.visualize()
+                    time.sleep(delay)
+
+                if game.game_over():
+                    # game is over so change op final value
+                    op = ptm == 0
+                    op_model = models[op]
+                    if(len(hist[op]["rewards"]) > 0):
+                        hist[op]["rewards"][-1] = game.score_state(op)
+
+                    if(len(hist[ptm]["rewards"]) > 0):
+                        hist[ptm]["rewards"][-1] = game.score_state(ptm)
+
+                    # propagate gamma through time
+                    pmtOffsetRewards = offsetRewardsByTime(hist[ptm]["rewards"][:], gamma)
+                    opOffsetRewards = offsetRewardsByTime(hist[op]["rewards"][:], gamma)
+
+                    ptmLabels = makeLabels(hist[ptm]["outputs"][:], pmtOffsetRewards[:], hist[ptm]["actions"][:])
+                    oppLabels = makeLabels(hist[op]["outputs"][:], opOffsetRewards[:], hist[ptm]["actions"][:])
+
+                    ptm_input = hist[ptm]["states"]
+                    op_input = hist[op]["states"]
+
+                    if (len(ptmLabels) > 0):
+                        sess.run(model.optimizer,
+                                 feed_dict={
+                                    model.input: ptm_input,
+                                    model.labels: ptmLabels})
+                    else:
+                        print("1 turn game")
+
+                    if (len(oppLabels) > 0):
+                        sess.run(op_model.optimizer,
+                                 feed_dict={
+                                    op_model.input: op_input,
+                                    op_model.labels: oppLabels})
+                    else:
+                        print("1 turn game")
+
+        save_path = saver.save(sess, "./model_data/dqpgm.ckpt")
+        print("Model saved in path: %s" % save_path)
+
+
+def makeLabels(labels, rewards, actions):
+    for i, label in enumerate(labels):
+        labels[i][actions[i]] = rewards[i]
+    return labels
+
+
 def main():
-    trainDQPG(CustomGame())
+    trainDQPV2(CustomGame())
     # trainQT(CustomGame())
 
 

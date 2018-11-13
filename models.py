@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import json
 import pickle
 
 
@@ -47,7 +46,7 @@ class DQPolicyGradientModel:
         self.input_size = input_size  # D L R U
         self.output_size = output_size
         self.expansion = 5
-        self.learning_rate = 0.00001
+        self.learning_rate = 0.0000001
         self.dropout = 0.95
         self.input = tf.placeholder(shape=[None, input_size], dtype=tf.float32)
 
@@ -82,6 +81,49 @@ class DQPolicyGradientModel:
 
     def loss_function(self):
         return -tf.reduce_mean(tf.log(self.actionProb + 1e-15) * self.rewards)
+
+    def optimizer_function(self):
+        # return tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+        return tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
+
+
+class DQPolicyGradientModelV2:
+    def __init__(self, input_size=2604, output_size=4):
+        self.input_size = input_size  # D L R U
+        self.output_size = output_size
+        self.expansion = 5
+        self.learning_rate = 0.0000001
+        self.dropout = 0.95
+        self.input = tf.placeholder(shape=[None, input_size], dtype=tf.float32)
+
+        self.output = self.forward_pass()
+        self.labels = tf.placeholder(shape=[None, output_size], dtype=tf.float32)
+
+        self.loss = self.loss_function()
+        self.optimizer = self.optimizer_function()
+
+    def forward_pass(self):
+        """
+        Predicts a action given an game state using fully connected layers
+
+        :return: the predicted label as a tensor
+        """
+        w1 = tf.Variable(tf.truncated_normal([self.input_size, self.input_size * self.output_size], stddev=0.01, dtype=tf.float32))
+        b1 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size], stddev=0.01, dtype=tf.float32))
+        o1 = tf.nn.dropout(tf.nn.relu(tf.add(tf.matmul(self.input, w1), b1)), self.dropout)
+
+        w2 = tf.Variable(tf.truncated_normal([self.input_size * self.output_size, self.input_size], stddev=0.01, dtype=tf.float32))
+        b2 = tf.Variable(tf.truncated_normal([self.input_size], stddev=0.01, dtype=tf.float32))
+        o2 = tf.nn.relu(tf.add(tf.matmul(o1, w2), b2))
+
+        w3 = tf.Variable(tf.truncated_normal([self.input_size, self.output_size], stddev=0.01, dtype=tf.float32))
+        b3 = tf.Variable(tf.truncated_normal([self.output_size], stddev=0.01, dtype=tf.float32))
+        o3 = tf.nn.softmax(tf.add(tf.matmul(o2, w3), b3))
+
+        return o3
+
+    def loss_function(self):
+        return tf.losses.log_loss(self.output, tf.nn.softmax(self.labels))
 
     def optimizer_function(self):
         # return tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.loss)

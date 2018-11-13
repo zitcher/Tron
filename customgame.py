@@ -6,7 +6,13 @@ import copy
 
 class CustomGame:
     def __init__(self):
-        self.maps = ["./maps/joust.txt", "./maps/divider.txt", "./maps/hunger_games.txt"] #, "./maps/maze.txt"
+        # self.maps = ["./maps/joust.txt",
+        #              "./maps/divider.txt",
+        #              "./maps/hunger_games.txt",
+        #              "./maps/maze.txt",
+        #              "./maps/maze2.txt",
+        #              "./maps/maze3.txt"]
+        self.maps = ["./maps/hunger_games.txt"]
         self.reset()
 
     def get_game_problem(self):
@@ -81,7 +87,7 @@ class CustomGame:
                 return 1
             else:
                 return 0
-        return 0.1
+        return 0.01
 
     def get_results(self):
         return self.game.evaluate_state(self.game.get_start_state())
