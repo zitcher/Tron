@@ -133,7 +133,7 @@ def main():
 
 
 class Argument_Defaults:
-    MAP = "./maps/joust.txt"
+    MAP = "./maps/box.txt"
     MAX_WAIT = 0.3
     BOTS = ["student", "student"]
     IMAGE_DELAY = 0.2
