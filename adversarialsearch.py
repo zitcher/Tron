@@ -36,14 +36,15 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
-            return float("inf"), None
+            return 999, None
         else:
-            return float("-inf"), None
+            return -999, None
     if turn_num > cutoff:
         return eval_func(state, player), None
     v = -math.inf
     chosen_action = None
     actions = get_safe_moves(state.player_has_armor(player), state.board, state.player_locs[player])
+    print(actions)
     for a in actions:
         new_state = asp.transition(state, a)
         new_player = new_state.player_to_move()
@@ -68,9 +69,9 @@ def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
-            return float("inf"), None
+            return 999, None
         else:
-            return float("-inf"), None
+            return -999, None
     if turn_num > cutoff:
         return eval_func(state, player), None
     v = math.inf
