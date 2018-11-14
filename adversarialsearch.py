@@ -45,7 +45,13 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num):
     chosen_action = None
     actions = asp.get_safe_actions(state.board, state.player_locs[player])
     for a in actions:
-        vm, action = abc_min_value(asp, player, asp.transition(state, a), eval_func, alpha, beta, cutoff, turn_num + 1)
+        new_state = asp.transition(state, a)
+        new_player = new_state.player_to_move()
+        vm, action = None, None
+        if new_player != player:
+            vm, action = abc_min_value(asp, player, new_state, eval_func, alpha, beta, cutoff, turn_num + 1)
+        else:
+            vm, action = abc_max_value(asp, player, new_state, eval_func, alpha, beta, cutoff, turn_num + 1)
         if vm > v:
             v = vm
             chosen_action = a
@@ -71,7 +77,13 @@ def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num):
     chosen_action = None
     actions = asp.get_safe_actions(state.board, state.player_locs[player == 0])
     for a in actions:
-        vm, action = abc_max_value(asp, player, asp.transition(state, a), eval_func, alpha, beta, cutoff, turn_num + 1)
+        new_state = asp.transition(state, a)
+        new_player = new_state.player_to_move()
+        vm, action = None, None
+        if new_player != player:
+            vm, action = abc_min_value(asp, player, new_state, eval_func, alpha, beta, cutoff, turn_num + 1)
+        else:
+            vm, action = abc_max_value(asp, player, new_state, eval_func, alpha, beta, cutoff, turn_num + 1)
         if vm < v:
             v = vm
             chosen_action = a

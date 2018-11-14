@@ -7,7 +7,7 @@ files
 
 """
 import bots
-import ta_bots
+# import ta_bots
 
 
 def determine_bot_functions(bot_names):
@@ -19,10 +19,10 @@ def determine_bot_functions(bot_names):
             bot_list.append(bots.RandBot())
         elif name == "wall":
             bot_list.append(bots.WallBot())
-        elif name == "ta1":
-            bot_list.append(ta_bots.TABot1())
-        elif name == "ta2":
-            bot_list.append(ta_bots.TABot2())
+        # elif name == "ta1":
+        #     bot_list.append(ta_bots.TABot1())
+        # elif name == "ta2":
+        #     bot_list.append(ta_bots.TABot2())
         else:
             raise ValueError(
                 """Bot name %s is not supported. Value names include "student",
