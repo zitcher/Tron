@@ -6,6 +6,7 @@ import time
 import boardparser
 from vornoi import Vornoi
 from adversarialsearch import alpha_beta_cutoff
+from tronproblem import TronProblem
 
 # Throughout this file, ASP means adversarial search problem.
 
@@ -27,7 +28,7 @@ class StudentBot:
         move = alpha_beta_cutoff(asp, 6, vornoi_solver.calc, vornoi_solver.get_safe_actions)
         state = asp.get_start_state()
         player = state.ptm
-        print("PLAYER", asp.get_start_state().ptm, "MOVE", move, "SAFE MOVES", vornoi_solver.get_safe_actions(state, player, state.board, state.player_locs[player]))
+        print("PLAYER", asp.get_start_state().ptm, "MOVE", move, "SAFE MOVES", vornoi_solver.get_safe_actions(state.player_has_armor(player), state.board, state.player_locs[player]))
         return move
 
     def cleanup(self):

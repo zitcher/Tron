@@ -1,4 +1,5 @@
 from collections import deque
+from tronproblem import TronProblem
 
 
 class Cell:
@@ -76,12 +77,12 @@ class Vornoi:
         y = pos[1]
         return ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))
 
-    def get_safe_actions(self, state, player, board, loc):
+    def get_safe_actions(self, has_armor, board, loc):
         safe = []
         for i, pos in enumerate(self.get_list_adjacent(loc)):
             if not (
                 board[pos[0]][pos[1]] == "#"
-                or (board[pos[0]][pos[1]] == "x" and not state.player_has_armor(player))
+                or (board[pos[0]][pos[1]] == "x" and not has_armor)
                 or board[pos[0]][pos[1]] == "1"
                 or board[pos[0]][pos[1]] == "2"
             ):

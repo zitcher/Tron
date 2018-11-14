@@ -43,7 +43,7 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
         return eval_func(state, player), None
     v = -math.inf
     chosen_action = None
-    actions = get_safe_moves(state, player, state.board, state.player_locs[player])
+    actions = get_safe_moves(state.player_has_armor(player), state.board, state.player_locs[player])
     # print(actions, player)
     for a in actions:
         new_state = asp.transition(state, a)
@@ -77,7 +77,7 @@ def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     v = math.inf
     chosen_action = None
     opp = player == 0
-    actions = get_safe_moves(state, opp, state.board, state.player_locs[opp])
+    actions = get_safe_moves(state.player_has_armor(opp), state.board, state.player_locs[opp])
     for a in actions:
         new_state = asp.transition(state, a)
         new_player = new_state.player_to_move()
