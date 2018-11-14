@@ -24,8 +24,11 @@ class StudentBot:
         state by calling asp.get_start_state()
         """
         vornoi_solver = Vornoi()
-
-        return alpha_beta_cutoff(asp, 6, vornoi_solver.calc)
+        move = alpha_beta_cutoff(asp, 6, vornoi_solver.calc, vornoi_solver.get_safe_actions)
+        state = asp.get_start_state()
+        player = state.ptm
+        print("PLAYER", asp.get_start_state().ptm, "MOVE", move, "SAFE MOVES", vornoi_solver.get_safe_actions(state, player, state.board, state.player_locs[player]))
+        return move
 
     def cleanup(self):
         """

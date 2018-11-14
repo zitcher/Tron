@@ -12,7 +12,7 @@ class Vornoi:
     def __init__(self):
         self.bad_set = set(['x', '#'])
         self.ties = set()
-        return
+        self.actions = {0: "R", 1: "L", 2: "D", 3: "U"}
 
     def board_to_cells(self, board):
         cell_board = []
@@ -69,8 +69,21 @@ class Vornoi:
         return cell.type not in self.bad_set and cell.owner != player
 
     def get_list_adjacent(self, pos):
+        '''
+        returns pos in R L D U order
+        '''
         x = pos[0]
         y = pos[1]
         return ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))
 
-    # def mark_board(self, board):
+    def get_safe_actions(self, state, player, board, loc):
+        safe = []
+        for i, pos in enumerate(self.get_list_adjacent(loc)):
+            if not (
+                board[pos[0]][pos[1]] == "#"
+                or (board[pos[0]][pos[1]] == "x" and not state.player_has_armor(player))
+                or board[pos[0]][pos[1]] == "1"
+                or board[pos[0]][pos[1]] == "2"
+            ):
+                safe.append(self.actions[i])
+        return safe
