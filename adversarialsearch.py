@@ -27,7 +27,6 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func, get_safe_moves):
 
     Output: an action(an element of asp.get_safe_actions(asp.get_start_state()))
     """
-    asp = copy.deepcopy(asp)
     state = asp.get_start_state()
     player = state.player_to_move()
     v, action = abc_max_value(asp, player, state, eval_func, -math.inf, math.inf, cutoff_ply, 1, get_safe_moves)
@@ -35,7 +34,6 @@ def alpha_beta_cutoff(asp, cutoff_ply, eval_func, get_safe_moves):
 
 
 def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, get_safe_moves):
-    asp = copy.deepcopy(asp)
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
@@ -47,9 +45,11 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     v = -math.inf
     chosen_action = None
     actions = get_safe_moves(state.player_has_armor(player), state.board, state.player_locs[player])
-    print(actions)
+    # asp.visualize_state(state, True)
+    # print("^", actions)
     for a in actions:
-        new_state = asp.transition(state, a)
+        trans_state = copy.deepcopy(state)
+        new_state = asp.transition(trans_state, a)
         new_player = new_state.player_to_move()
         vm, action = None, None
         if new_player != player:
@@ -69,7 +69,6 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
 
 
 def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, get_safe_moves):
-    asp = copy.deepcopy(asp)
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
@@ -83,7 +82,8 @@ def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     opp = player == 0
     actions = get_safe_moves(state.player_has_armor(opp), state.board, state.player_locs[opp])
     for a in actions:
-        new_state = asp.transition(state, a)
+        trans_state = copy.deepcopy(state)
+        new_state = asp.transition(trans_state, a)
         new_player = new_state.player_to_move()
         vm, action = None, None
         if new_player != player:
