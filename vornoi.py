@@ -48,7 +48,9 @@ class Vornoi:
             cell = board[cell_location[0]][cell_location[1]]
             scores[cell.owner] += self.expand(fringe, board, cell_location)
 
-        return scores[player] - scores[opp] + armor
+        if scores[player] - scores[opp] > 0:
+            return scores[player] - scores[opp] + armor
+        return scores[player] + armor
 
     def expand(self, fringe, board, cell_location):
         total = 0

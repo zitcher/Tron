@@ -26,7 +26,7 @@ class StudentBot:
         state by calling asp.get_start_state()
         """
 
-        return alpha_beta_cutoff(asp, 4, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
+        return alpha_beta_cutoff(asp, 6, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
 
     def cleanup(self):
         """
