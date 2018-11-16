@@ -27,6 +27,7 @@ class Vornoi:
     def calc(self, state, player):
         self.ties = set()
         scores = [0, 0]
+        armor = 2 if state.player_has_armor(player) else 0
 
         board = self.board_to_cells(state.board)
         playerLocs = state.player_locs
@@ -47,7 +48,7 @@ class Vornoi:
             cell = board[cell_location[0]][cell_location[1]]
             scores[cell.owner] += self.expand(fringe, board, cell_location)
 
-        return scores[player] - scores[opp]
+        return scores[player] - scores[opp] + armor
 
     def expand(self, fringe, board, cell_location):
         total = 0
