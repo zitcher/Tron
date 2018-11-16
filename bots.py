@@ -15,6 +15,7 @@ class StudentBot:
     """ Write your student bot here"""
     def __init__(self):
         self.parser = boardparser.Parser()
+        self.vornoi_solver = Vornoi()
 
     def decide(self, asp):
         """
@@ -24,8 +25,8 @@ class StudentBot:
         To get started, you can get the current
         state by calling asp.get_start_state()
         """
-        vornoi_solver = Vornoi()
-        return alpha_beta_cutoff(asp, 4, vornoi_solver.calc, vornoi_solver.get_safe_actions)
+
+        return alpha_beta_cutoff(asp, 4, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
 
     def cleanup(self):
         """

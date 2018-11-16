@@ -1,8 +1,6 @@
 import time
 from tronproblem import TronProblem
-import copy
-import argparse
-import signal
+import copy, argparse, signal
 from collections import defaultdict
 import support
 import random
@@ -21,7 +19,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
     Runs a game and outputs the evaluation of the terminal state.
     """
     state = asp.get_start_state()
-    if visualizer is not None:
+    if not visualizer == None:
         visualizer(state, colored)
         time.sleep(delay)
 
@@ -32,7 +30,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
         try:
             # run AI
             decision = bots[state.ptm].decide(exposed)
-        except support.TimeoutException:
+        except support.TimeoutException as msg:
             if visualizer:
                 print(
                     """Warning. Player %s took too long to decide on a move.
@@ -43,14 +41,14 @@ They will go UP this round."""
         signal.setitimer(signal.ITIMER_REAL, 0)
 
         available_actions = asp.get_available_actions(state)
-        if decision not in available_actions:
+        if not decision in available_actions:
             decision = list(available_actions)[0]
 
         result_state = asp.transition(state, decision)
         asp.set_start_state(result_state)
 
         state = result_state
-        if visualizer is not None:
+        if not visualizer == None:
             visualizer(state, colored)
             time.sleep(delay)
 
@@ -106,8 +104,6 @@ def main():
     multi = args.multi_test
     colored = args.colored
 
-    game = TronProblem(args.map, 0)
-
     visualizer = None
     if verbose:
         visualizer = TronProblem.visualize_state
@@ -116,9 +112,8 @@ def main():
         winners = defaultdict(int)
         bots = support.determine_bot_functions(args.bots)
         for i in range(multi):
-            outcome = run_game(
-                copy.deepcopy(game), bots, visualizer, delay, wait, colored
-            )
+            game = TronProblem(args.map, 0)
+            outcome = run_game(game, bots, visualizer, delay, wait, colored)
             winner = outcome.index(1)
             winners[winner] += 1
             for bot in bots:
@@ -127,15 +122,16 @@ def main():
             print("Player %s won %d out of %d times" % (winner + 1, wins, multi))
 
     else:
-        outcome = run_game(copy.deepcopy(game), bots, visualizer, delay, wait, colored)
+        game = TronProblem(args.map, 0)
+        outcome = run_game(game, bots, visualizer, delay, wait, colored)
         winner = outcome.index(1) + 1
         print("Player %s won!" % winner)
 
 
 class Argument_Defaults:
-    MAP = "./maps/joust.txt"
+    MAP = "./maps/empty_room.txt"
     MAX_WAIT = 0.3
-    BOTS = ["student", "student"]
+    BOTS = ["random", "random"]
     IMAGE_DELAY = 0.2
 
 
