@@ -16,6 +16,7 @@ class StudentBot:
     def __init__(self):
         self.parser = boardparser.Parser()
         self.vornoi_solver = Vornoi()
+        self.BOT_NAME = "Zooomchooz"
 
     def decide(self, asp):
         """

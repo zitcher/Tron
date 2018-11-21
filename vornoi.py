@@ -11,9 +11,11 @@ class Cell:
 
 class Vornoi:
     def __init__(self):
-        self.bad_set = set(['x', '#'])
+        self.bad_set = set(['x', '#', '1', '2'])
+        self.good_set = set(['*', '^', '@', '!'])
         self.ties = set()
         self.actions = {0: "D", 1: "U", 2: "R", 3: "L"}
+        self.board_size = 196
 
     def board_to_cells(self, board):
         cell_board = []
@@ -27,7 +29,7 @@ class Vornoi:
     def calc(self, state, player):
         self.ties = set()
         scores = [0, 0]
-        armor = 2 if state.player_has_armor(player) else 0
+        armor = 3 if state.player_has_armor(player) else 0
 
         board = self.board_to_cells(state.board)
         playerLocs = state.player_locs
@@ -49,7 +51,7 @@ class Vornoi:
             scores[cell.owner] += self.expand(fringe, board, cell_location)
 
         if scores[player] - scores[opp] > 0:
-            return scores[player] - scores[opp] + armor
+            return scores[player] - scores[opp] + armor + self.board_size
         return scores[player] + armor
 
     def expand(self, fringe, board, cell_location):
@@ -60,7 +62,7 @@ class Vornoi:
             if pos in self.ties or not self.expandable(new_cell, player):
                 continue
 
-            total += 1
+            total += self.value(new_cell)
             if new_cell.owner is None:
                 new_cell.owner = player
                 fringe.append(pos)
@@ -69,8 +71,13 @@ class Vornoi:
 
         return total
 
+    def value(self, cell):
+        if cell.type in self.good_set:
+            return 2
+        return 1
+
     def expandable(self, cell, player):
-        return cell.type not in self.bad_set and cell.owner != player
+        return cell.type not in self.bad_set and cell.owner != player:
 
     def get_list_adjacent(self, pos):
         '''
@@ -85,10 +92,8 @@ class Vornoi:
         for i, pos in enumerate(self.get_list_adjacent(loc)):
             element = board[pos[0]][pos[1]]
             if not (
-                element == "#" or
                 (element == "x" and not has_armor) or
-                element == "1" or
-                element == "2"
+                element in self.bad_set
             ):
                 safe.append(self.actions[i])
         return safe

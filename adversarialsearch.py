@@ -37,9 +37,9 @@ def abc_max_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
-            return 999, None
+            return 9999, None
         else:
-            return -999, None
+            return -9999, None
     if turn_num > cutoff:
         return eval_func(state, player), None
     v = -math.inf
@@ -72,9 +72,9 @@ def abc_min_value(asp, player, state, eval_func, alpha, beta, cutoff, turn_num, 
     if asp.is_terminal_state(state):
         evaluation = asp.evaluate_state(state)
         if evaluation[player] == 1:
-            return 999, None
+            return 9999, None
         else:
-            return -999, None
+            return -9999, None
     if turn_num > cutoff:
         return eval_func(state, player), None
     v = math.inf

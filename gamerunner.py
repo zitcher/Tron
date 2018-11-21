@@ -180,3 +180,5 @@ class HelpMessage:
 
 if __name__ == "__main__":
     main()
+
+# python gamerunner.py -bots student ta2 -map maps/divider.txt -multi_test 100 -no_image
