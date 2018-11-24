@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
-import numpy as np
 import random
 import time
-import boardparser
 from vornoi import Vornoi
 from adversarialsearch import alpha_beta_cutoff
 from tronproblem import TronProblem
@@ -14,7 +12,6 @@ from tronproblem import TronProblem
 class StudentBot:
     """ Write your student bot here"""
     def __init__(self):
-        self.parser = boardparser.Parser()
         self.vornoi_solver = Vornoi()
         self.BOT_NAME = "Zooomchooz"
 
@@ -26,53 +23,12 @@ class StudentBot:
         To get started, you can get the current
         state by calling asp.get_start_state()
         """
-
-        return alpha_beta_cutoff(asp, 6, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
-
-    def cleanup(self):
-        """
-        Input: None
-        Output: None
-
-        This function will be called in between
-        games during grading. You can use it
-        to reset any variables your bot uses during the game
-        (for example, you could use this function to reset a
-        turns_elapsed counter to zero). If you don't need it,
-        feel free to leave it as "pass"
-        """
-        pass
-
-
-class VornoiBot:
-    """ Write your student bot here"""
-    def __init__(self):
-        self.parser = boardparser.Parser()
-
-    def decide(self, asp):
-        """
-        Input: asp, a TronProblem
-        Output: A direction in {'U','D','L','R'}
-
-        To get started, you can get the current
-        state by calling asp.get_start_state()
-        """
-        vornoi_solver = Vornoi()
-
-        state = asp.get_start_state()
-        player = state.ptm
-        safe_moves = list(asp.get_safe_actions(state.board, state.player_locs[player]))
-        new_states = [asp.transition(state, move) for move in safe_moves]
-
-        start = time.time()
-        scored = [vornoi_solver.calc(nstate, player) for nstate in new_states]
-        end = time.time()
-        print(end - start)
-
-        if len(scored) == 0:
-            return "U"
-
-        return safe_moves[np.argmax(scored)]
+        #
+        # start = time.time()
+        # action = alpha_beta_cutoff(asp, 6, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
+        # end = time.time()
+        # print("Zooomchooz", end - start)
+        return alpha_beta_cutoff(asp, 5, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
 
     def cleanup(self):
         """
@@ -87,7 +43,6 @@ class VornoiBot:
         feel free to leave it as "pass"
         """
         pass
-
 
 class RandBot:
     """Moves in a random (safe) direction"""

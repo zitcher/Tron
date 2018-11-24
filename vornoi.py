@@ -1,5 +1,5 @@
 from collections import deque
-from tronproblem import TronProblem
+import math
 
 
 class Cell:
@@ -11,29 +11,34 @@ class Cell:
 
 class Vornoi:
     def __init__(self):
+        self.armor = set(['x', '1', '2'])
         self.bad_set = set(['x', '#', '1', '2'])
-        self.good_set = set(['*', '^', '@', '!'])
+        self.good_set = set(['*', '@', '!'])
         self.ties = set()
         self.actions = {0: "D", 1: "U", 2: "R", 3: "L"}
-        self.board_size = 196
+        self.fringe = deque()
 
     def board_to_cells(self, board):
         cell_board = []
         for r in board:
-            cell_board.append([])
+            row = []
             for element in r:
-                cell_board[-1].append(Cell(element, None, float('inf')))
+                row.append(Cell(element, None, math.inf))
+            cell_board.append(row)
 
         return cell_board
 
     def calc(self, state, player):
         self.ties = set()
+
         scores = [0, 0]
         armor = 3 if state.player_has_armor(player) else 0
 
         board = self.board_to_cells(state.board)
         playerLocs = state.player_locs
+
         opp = 0 == player
+        opp_armor = 3 if state.player_has_armor(opp) else 0
 
         ptm_location = playerLocs[player]
         board[ptm_location[0]][ptm_location[1]].owner = player
@@ -41,20 +46,18 @@ class Vornoi:
         opp_location = playerLocs[opp]
         board[opp_location[0]][opp_location[1]].owner = opp
 
-        fringe = deque()
-        fringe.append(ptm_location)
-        fringe.append(opp_location)
+        self.fringe = deque()
+        self.fringe.append(ptm_location)
+        self.fringe.append(opp_location)
 
-        while(len(fringe) != 0):
-            cell_location = fringe.popleft()
+        while(self.fringe):
+            cell_location = self.fringe.popleft()
             cell = board[cell_location[0]][cell_location[1]]
-            scores[cell.owner] += self.expand(fringe, board, cell_location)
+            scores[cell.owner] += self.expand(board, cell_location)
 
-        if scores[player] - scores[opp] > 0:
-            return scores[player] - scores[opp] + armor + self.board_size
-        return scores[player] + armor
+        return scores[player] - scores[opp] + armor - opp_armor
 
-    def expand(self, fringe, board, cell_location):
+    def expand(self, board, cell_location):
         total = 0
         player = board[cell_location[0]][cell_location[1]].owner
         for pos in self.get_list_adjacent(cell_location):
@@ -65,7 +68,7 @@ class Vornoi:
             total += self.value(new_cell)
             if new_cell.owner is None:
                 new_cell.owner = player
-                fringe.append(pos)
+                self.fringe.append(pos)
             else:
                 self.ties.add(pos)
 
@@ -74,10 +77,12 @@ class Vornoi:
     def value(self, cell):
         if cell.type in self.good_set:
             return 2
+        elif cell.type == "^":
+            return 0.5
         return 1
 
     def expandable(self, cell, player):
-        return cell.type not in self.bad_set and cell.owner != player:
+        return cell.type not in self.bad_set and cell.owner != player
 
     def get_list_adjacent(self, pos):
         '''
@@ -91,9 +96,9 @@ class Vornoi:
         safe = []
         for i, pos in enumerate(self.get_list_adjacent(loc)):
             element = board[pos[0]][pos[1]]
-            if not (
-                (element == "x" and not has_armor) or
-                element in self.bad_set
+            if (
+                (element in self.armor and has_armor) or
+                element not in self.bad_set
             ):
                 safe.append(self.actions[i])
         return safe

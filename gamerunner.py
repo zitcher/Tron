@@ -1,6 +1,8 @@
 import time
 from tronproblem import TronProblem
-import copy, argparse, signal
+import copy
+import argparse
+import signal
 from collections import defaultdict
 import support
 import random
@@ -19,6 +21,7 @@ def run_game(asp, bots, visualizer=None, delay=0.2, max_wait=0.3, colored=True):
     Runs a game and outputs the evaluation of the terminal state.
     """
     state = asp.get_start_state()
+    print(0, bots[0].BOT_NAME, "vs", 1, bots[1].BOT_NAME)
     if not visualizer == None:
         visualizer(state, colored)
         time.sleep(delay)
@@ -52,6 +55,7 @@ They will go UP this round."""
             visualizer(state, colored)
             time.sleep(delay)
 
+    print(asp.evaluate_state(asp.get_start_state()))
     return asp.evaluate_state(asp.get_start_state())
 
 
@@ -129,9 +133,9 @@ def main():
 
 
 class Argument_Defaults:
-    MAP = "./maps/hunger_games.txt"
-    MAX_WAIT = 0.3
-    BOTS = ["student", "student"]
+    MAP = "./maps/joust.txt"
+    MAX_WAIT = 10
+    BOTS = ["student2", "student"]
     IMAGE_DELAY = 0.2
 
 

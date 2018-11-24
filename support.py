@@ -13,22 +13,21 @@ import bots
 def determine_bot_functions(bot_names):
     bot_list = []
     for name in bot_names:
-        if name == "student":
+        if name == 'student':
             bot_list.append(bots.StudentBot())
+        elif name == "student2":
+            bot_list.append(bots.StudentBot2())
         elif name == "random":
             bot_list.append(bots.RandBot())
         elif name == "wall":
             bot_list.append(bots.WallBot())
+        else:
+            raise ValueError("Bot name %s is not supported. Value names include 'student', 'random', 'wall', 'ta1', 'ta2', 'student2'", name)
+
         # elif name == "ta1":
         #     bot_list.append(ta_bots.TABot1())
         # elif name == "ta2":
         #     bot_list.append(ta_bots.TABot2())
-        else:
-            raise ValueError(
-                """Bot name %s is not supported. Value names include "student",
-"random", "wall", "ta1", "ta2" """
-                % name
-            )
     return bot_list
 
 
