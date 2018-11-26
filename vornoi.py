@@ -11,9 +11,6 @@ class Cell:
 
 class Vornoi:
     def __init__(self):
-        self.armor = set(['x', '1', '2'])
-        self.bad_set = set(['x', '#', '1', '2'])
-        self.good_set = set(['*', '@', '!'])
         self.ties = set()
         self.actions = {0: "D", 1: "U", 2: "R", 3: "L"}
         self.fringe = deque()
@@ -75,14 +72,16 @@ class Vornoi:
         return total
 
     def value(self, cell):
-        if cell.type in self.good_set:
+        if cell.type == '@':
+            return 1.5
+        if cell.type == '!':
+            return 5
+        if cell.type == '*':
             return 2
-        elif cell.type == "^":
-            return 0.5
         return 1
 
     def expandable(self, cell, player):
-        return cell.type not in self.bad_set and cell.owner != player
+        return cell.type != "x" and cell.type != "#" and cell.type != "1" and cell.type != "2" and cell.owner != player
 
     def get_list_adjacent(self, pos):
         '''
@@ -97,8 +96,8 @@ class Vornoi:
         for i, pos in enumerate(self.get_list_adjacent(loc)):
             element = board[pos[0]][pos[1]]
             if (
-                (element in self.armor and has_armor) or
-                element not in self.bad_set
+                (element != "x" and element != "#" and element != "1" and element != "2") or
+                (element == "x" and has_armor)
             ):
                 safe.append(self.actions[i])
         return safe

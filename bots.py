@@ -23,12 +23,13 @@ class StudentBot:
         To get started, you can get the current
         state by calling asp.get_start_state()
         """
-        #
+
         # start = time.time()
         # action = alpha_beta_cutoff(asp, 6, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
         # end = time.time()
         # print("Zooomchooz", end - start)
-        return alpha_beta_cutoff(asp, 5, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
+        # return action
+        return alpha_beta_cutoff(asp, 6, self.vornoi_solver.calc, self.vornoi_solver.get_safe_actions)
 
     def cleanup(self):
         """
@@ -43,6 +44,7 @@ class StudentBot:
         feel free to leave it as "pass"
         """
         pass
+
 
 class RandBot:
     """Moves in a random (safe) direction"""
