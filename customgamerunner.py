@@ -38,8 +38,6 @@ def run_game(bots, visualizer=False, delay=0.2, max_wait=0.3, colored=True):
     return game.get_results()
 
 # Note to self: clean this up for students.
-
-
 def main():
     random.seed(None)
     np.random.seed(None)

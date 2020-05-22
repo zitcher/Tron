@@ -7,8 +7,6 @@ import random
 import math
 import boardparser
 
-# Throughout this file, ASP means adversarial search problem.
-
 
 class StudentBot:
     """ Write your student bot here"""

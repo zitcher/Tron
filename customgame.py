@@ -84,10 +84,10 @@ class CustomGame:
     def score_state(self, player):
         if self.state_over():
             if self.game.evaluate_state(self.state)[player] == 1:
-                return 1
+                return 100
             else:
-                return 0
-        return 0.01
+                return -100
+        return 0
 
     def get_results(self):
         return self.game.evaluate_state(self.game.get_start_state())
